@@ -1,0 +1,7 @@
+node_modules
+# Keep environment variables out of version control
+.env
+src/with-cte-service.ts
+src/validate-answer.ts
+src/with-prisma-service.ts
+src/with-ts-logic.ts

@@ -1,0 +1,71 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["views"]
+  binaryTargets   = ["native", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+// Board do plano de ação. 
+// Tem várias ações
+model Board {
+  id           Int                 @id @default(autoincrement())
+  totalActions Int                 @default(0)
+  totalTasks   Int                 @default(0)
+  actionsDone  Int                 @default(0) // se refere a ações que todas as tarefas foram completas
+  tasksDone    Int                 @default(0)
+  actions      ActionBoardMapper[]
+  doneTasks    DoneTasksBoard[]
+
+  @@map("boards")
+}
+
+// Ação
+model Action {
+  id        Int       @id @default(autoincrement())
+  deletedAt DateTime?
+
+  tasks  Task[]
+  boards ActionBoardMapper[]
+
+  @@map("actions")
+}
+
+// Tabela de relação entre as ações e plano de ação.
+// Útil para não duplicar dados quando o usuário fixar a ação pra todos boards
+model ActionBoardMapper {
+  actionId Int
+  boardId  Int
+
+  action Action @relation(fields: [actionId], references: [id])
+  board  Board  @relation(fields: [boardId], references: [id])
+
+  @@id(fields: [actionId, boardId])
+  @@map("action_board_mappers")
+}
+
+// Tabela de relação entre as tarefas feitas por cada board
+model DoneTasksBoard {
+  taskId  Int
+  boardId Int
+
+  board Board @relation(fields: [boardId], references: [id])
+  task  Task  @relation(fields: [taskId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id(fields: [taskId, boardId])
+  @@map("done_tasks_boards")
+}
+
+// Tarefa, está dentro de uma ação
+model Task {
+  id       Int @id @default(autoincrement())
+  actionId Int
+
+  action Action           @relation(fields: [actionId], references: [id])
+  boards DoneTasksBoard[]
+
+  @@map("tasks")
+}

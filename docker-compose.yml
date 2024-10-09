@@ -1,0 +1,30 @@
+services:
+  sqlserver:
+    build: ./docker/sqlserver
+    container_name: survey-db-sql-exercise
+    mem_limit: 2G
+    memswap_limit: 4G
+    cpus: 2
+    env_file: .env
+    restart: unless-stopped
+    environment:
+      - MSSQL_USER=${DB_USER}
+      - MSSQL_SA_PASSWORD=${DB_PASSWORD}
+      - ACCEPT_EULA=Y
+    volumes:
+      - sqlserver:/var/opt/mssql
+    ports:
+      - "${DB_PORT:-1433}:1433"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          '/opt/mssql-tools18/bin/sqlcmd -C -U "${DB_USER}" -Q "SELECT 1"',
+        ]
+      interval: 10s
+      retries: 5
+      timeout: 3s
+
+volumes:
+  sqlserver:
+    driver: local
