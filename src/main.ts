@@ -20,6 +20,7 @@ async function testService({
   seedInput: SeedInput;
   prisma: PrismaClient;
 }) {
+  console.log(`\n---- INICIANDO TESTE ------`);
   let boardIds = await seed(seedInput);
   const service = new Service(prisma);
 

@@ -7,7 +7,6 @@ export class WithPrismaService extends BaseService {
   }
 
   public async execute(boardIds: number[]) {
-    const getTime = Date.now();
     const boards = await this.prisma.board.findMany({
       where: {
         id: {
@@ -37,10 +36,6 @@ export class WithPrismaService extends BaseService {
         },
       },
     });
-    const getTimeEnd = Date.now();
-    console.log(`get took ${getTimeEnd - getTime}`);
-
-    const logicTime = Date.now();
     const data: {
       boardId: number;
       totalActions: number;
@@ -76,10 +71,6 @@ export class WithPrismaService extends BaseService {
       ({ boardId, totalActions, actionsDone, totalTasks, tasksDone }) =>
         Prisma.sql`(${boardId}, ${totalActions}, ${actionsDone}, ${totalTasks}, ${tasksDone})`
     );
-    const logicTimeEnd = Date.now();
-    console.log(`logic took ${logicTimeEnd - logicTime}`);
-
-    const updateTime = Date.now();
 
     await this.prisma.$executeRaw`
     MERGE INTO boards AS target
@@ -92,7 +83,5 @@ export class WithPrismaService extends BaseService {
         target.totalTasks = source.totalTasks,
         target.tasksDone = source.tasksDone;
     `;
-    const updateTimeEnd = Date.now();
-    console.log(`update took ${updateTimeEnd - updateTime}`);
   }
 }
